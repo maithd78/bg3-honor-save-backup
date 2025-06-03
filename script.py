@@ -1,17 +1,22 @@
-import shutil
-import os
+import sample
 import time
-import glob
 
-backup_location = "C:/Users/maith/Documents/Backups/BG3/"
-list_of_files = glob.glob("C:/Users/maith/AppData/Local/Larian Studios/Baldur's Gate 3/PlayerProfiles/Public/Savegames/Story/*")
-latest_save = max(list_of_files, key=os.path.getmtime)
+from sample import backup
+from sample import process
 
-shutil.copytree(latest_save, backup_location + 'tempfiles/' + os.path.basename(os.path.normpath(latest_save)))
-
-timestr = time.strftime("%Y%m%d-%H%M%S")
-backup_name = backup_location + timestr
-
-os.chdir(backup_location)
-shutil.make_archive(backup_name, 'zip', 'tempfiles/')
-shutil.rmtree('tempfiles')
+def main_loop():
+    while process.check_process('bg3_dx11.exe'):
+        backup.create_backup()
+        print("sleeping")
+        time.sleep(900)
+    else:
+        print("Baldurs Gate 3 has stopped\nCreating last backup")
+        backup.create_backup()
+        input("press any key to exit")
+        
+if process.check_process('bg3_dx11.exe'):
+    print("Baldurs Gate 3 is running.\nrunning script")
+    main_loop()
+else:
+    print("bg3.exe is not running")
+    input("press any key to exit")
